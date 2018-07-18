@@ -279,12 +279,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   numBlocks: 0
-  itemPrefab: {fileID: 1305783236509820, guid: c0067abc033b6ab42a42ffc2faba032d, type: 2}
+  itemPrefab: {fileID: 1020744840967868, guid: 9ff74502bf3b84a42a51414a9af59959, type: 2}
   startLoc: {x: 0, y: 0}
   swaps: []
   t: 0
   sortSpeed: 0
   screenSize: 0
+  isSorted: 0
+  itemType: Ball
+  sortType: 
 --- !u!4 &1928433594
 Transform:
   m_ObjectHideFlags: 0

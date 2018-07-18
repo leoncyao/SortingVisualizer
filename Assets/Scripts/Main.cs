@@ -1,30 +1,56 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 
+
+
 public class Main : MonoBehaviour {
-    public int numBlocks;
+    public int numItems;
     public GameObject itemPrefab;
     public Vector2 startLoc;
     public static Main instance;
-    public List<Vector2> swaps;
-    public int t;
     public int sortSpeed;
-
     public float screenSize;
     float centerX, centerY;
     Camera mainCamera;
+    public bool isSorted;
 
+    public string itemType, sortType, operationType;
+
+    public DateTime t;
+    public DateTime startTime;
+    public TimeSpan sortTime;
+
+    public int operationCounter;
+
+    GUIStyle guiStyle;
     public void Start()
     {
-        instance = this;
-        numBlocks = 9;
-        t = 0;
-        //sortSpeed = 4;
-        int sortSpeedScale = 1;
-        sortSpeed = sortSpeedScale * 60 / numBlocks;
+        itemType = "Block";
+        sortType = "MergeSort1";
 
+        instance = this;
+        numItems = 10;
+        startTime = new DateTime();
+        t = new DateTime();
+
+        isSorted = true;
+
+        //sortSpeed = 4;
+        //int sortSpeedScale = 100;
+        //sortSpeed =  Mathf.Max(1, sortSpeedScale * numItems / 60);
+        sortSpeed = 1;
         screenSize = 6f;
+
+        if (itemType == "Ball")
+        {
+            itemPrefab = (GameObject)Resources.Load("prefabs/Ball", typeof(GameObject));
+        }
+        else if (itemType == "Block")
+        {
+            itemPrefab = (GameObject)Resources.Load("prefabs/Block", typeof(GameObject));
+        }
 
         centerX = screenSize / 2;
         centerY = screenSize / 2;
@@ -38,67 +64,136 @@ public class Main : MonoBehaviour {
         mainCamera.orthographicSize = screenSize / 2;
         mainCamera.backgroundColor = Color.blue;
 
-        swaps = new List<Vector2>();
-        Block.positions = new List<int>();
-        for (int i = 0; i < numBlocks; i++)
+        guiStyle = new GUIStyle();
+        guiStyle.fontSize = 40;
+
+        Item.positions = new List<int>();
+        for (int i = 0; i < numItems; i++)
         {
-            Block.positions.Add(i);
+            Item.positions.Add(i);
         }
-        //Block.positions = new List<int>( new int[] {5, 4, 2, 1, 9, 0, 3, 6, 8 ,7});
-        Block.positions = new List<int>(makeRandomVals(0, numBlocks));
+
         //listPrinter(Block.positions);
-        for (int i = 0; i < numBlocks; i++)
+        for (int i = 0; i < numItems; i++)
         {
             Instantiate(itemPrefab, Vector3.zero, Quaternion.identity);
         }
+
+        List<int> temp1 = new List<int>(makeRandomVals(0, 4));
+        List<int> temp2 = new List<int>(makeRandomVals(0, 4));
+        listPrinter(temp1);
+        listPrinter(temp2);
+        listPrinter<int>(SortingMethods.merge1(temp1, temp2));
+        listPrinter(temp1);
+        listPrinter(temp2);
     }
     public void Update()
     {
         if (Input.GetMouseButtonDown(0))
         {
-            if (swaps.Count == 0)
-            {
-                bubbleSort(Ball.values);
-                List<int> copy = new List<int>();
-                foreach (Ball ball in Ball.balls)
-                {
-                    copy.Add(Ball.values.IndexOf(ball.dist));
-                }
-                Block.positions = new List<int>(copy);
-                bubbleSort(copy);         
-            }
+            shuffle();
         }
         //If there are swaps to be done (positions isn't sorted)
-        if (swaps.Count > 0)
-        {
-            if (t % (100/sortSpeed) == 0)
-            {
-                swap(Block.positions, (int)swaps[0].x, (int)swaps[0].y);
-                swaps.RemoveAt(0);
-                listPrinter(Block.positions);
-            }
-            t += 1;
-        }
-    }
-    public void bubbleSort<T>(List<T> A) where T : System.IComparable<T>
-    {
-        for (int i = 0; i < A.Count-1; i++)
-        {
-            for (int j = 0; j < A.Count-1; j++)
-            {
-                if (A[j].CompareTo(A[j + 1]) > 0)
+        if (SortingMethods.swaps.Count > 0 || SortingMethods.insertions.Count > 0 && !isSorted)
+        {               
+            if (t.Ticks % (sortSpeed) == 0)
                 {
-                    swap(A, j, j + 1);
-                    swaps.Add(new Vector2(j, j + 1));
+                // This can be simplified by making temp list and setting it equal to swaps or insertions
+                if (sortType == "BubbleSort" || sortType == "InsertionSort2" || sortType == "SelectionSort")
+                {
+                    SortingMethods.swap(Item.positions, (int)SortingMethods.swaps[0].x, (int)SortingMethods.swaps[0].y);
+                    SortingMethods.swaps.RemoveAt(0);
+                    operationType = "Swaps";
+                } else if (sortType == "InsertionSort1")
+                {
+                    SortingMethods.insert(Item.positions, (int)SortingMethods.insertions[0].x, (int)SortingMethods.insertions[0].y);
+                    SortingMethods.insertions.RemoveAt(0);
+                    operationType = "Insertions";
                 }
+                else if (sortType == "MergeSort1")
+                {
+                    SortingMethods.swap(Item.positions, (int)SortingMethods.insertions[0].x, (int)SortingMethods.insertions[0].y);
+                    SortingMethods.swaps.RemoveAt(0);
+                    operationType = "swaps";
+                }
+                //listPrinter(Item.positions);
+                operationCounter += 1;
             }
+
+            sortTime = DateTime.Now - startTime;
+        }
+        checkFinished();
+    }
+    public void shuffle()
+    {
+        if (SortingMethods.swaps.Count == 0 && SortingMethods.insertions.Count == 0)
+        {
+            
+            List<int> copy = new List<int>();
+            if (itemType == "Ball")
+            {
+                Item.positions = new List<int>(makeRandomVals(0, numItems));
+                Ball.randomizeAll();
+                for (int i = 0; i < Item.positions.Count; i++)
+                {
+                    copy.Add(Item.positions[i]);
+                }
+                //bubbleSort(copy);
+            }
+            else if (itemType == "Block")
+            {
+                copy = new List<int>(makeRandomVals(0, numItems));
+                Block.positions = new List<int>(copy);
+            }
+            print("starting array is ");
+            listPrinter(copy);
+
+            ////Get the method information using the method info class
+            //MethodInfo mi = this.GetType().GetMethod(sortType);
+            //mi.Invoke(this, new List<int>[] { copy });
+
+            if (sortType == "BubbleSort")
+            {
+                SortingMethods.BubbleSort(copy);
+            }
+            else if (sortType == "InsertionSort1")
+            {
+                SortingMethods.InsertionSort1(copy);
+            }
+            else if (sortType == "InsertionSort2")
+            {
+                SortingMethods.InsertionSort2(copy);
+            }
+            else if (sortType == "SelectionSort")
+            {
+                SortingMethods.SelectionSort(copy);
+            }
+            else if (sortType == "MergeSort1")
+            {
+                SortingMethods.MergeSort1(copy);
+            }
+
+            print("After sort is ");
+            listPrinter(copy);
+
+            operationCounter = 0;
+            startTime = DateTime.Now;
+            isSorted = false;
         }
     }
-    public void swap<T>(List<T> A, int a, int b) 
+    public void checkFinished()
     {
-        T temp = A[a];
-        A[a] = A[b];
-        A[b] = temp;
+        if (SortingMethods.swaps.Count == 0 && SortingMethods.insertions.Count == 0 && !isSorted)
+        {
+            isSorted = true;
+        }
+    }
+    public void OnGUI()
+    {
+        GUI.Label(new Rect(40, 20 , 100, 100), sortType + " time (in seconds)" , guiStyle);
+        GUI.Label(new Rect(40, 20 + guiStyle.fontSize + 1, 100, 100), sortTime.Seconds.ToString(),  guiStyle);
+        GUI.Label(new Rect(40, 20 + 2 * guiStyle.fontSize + 1, 100, 100), "number of " + operationType, guiStyle);
+        GUI.Label(new Rect(40, 20 + 3 * guiStyle.fontSize + 1, 100, 100), operationCounter.ToString(), guiStyle);
     }
     public void listPrinter<T>(List<T> A)
     {
@@ -113,8 +208,8 @@ public class Main : MonoBehaviour {
     public List<int> makeRandomVals(int a, int b)
     {
         // First Generate a list a...b
-        int[] values = new int[numBlocks];
-        for (int i = a; i < numBlocks; i++)
+        int[] values = new int[b - a];
+        for (int i = a; i < b - a; i++)
         {
             values[i] = i;
         }
@@ -122,14 +217,18 @@ public class Main : MonoBehaviour {
 
         // Next, swap the values randomly 
         System.Random random = new System.Random();
-        for (int i = a; i < numBlocks; i++)
+        for (int i = a; i < b - a; i++)
         {
             if (random.Next(0, 2) == 1)
             {
                 int choice = random.Next(a, b);
-                swap(randomValues, i, choice);
+                SortingMethods.swap(randomValues, i, choice);
             }
         }
         return randomValues;
     }
+    
+
+
+
 }

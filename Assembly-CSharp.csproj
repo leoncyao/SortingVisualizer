@@ -9,7 +9,7 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{D9329079-6E44-D1E5-CB23-635936AAFD1F}</ProjectGuid>
+    <ProjectGuid>{B012AE0D-A32D-7350-8845-9352599F717A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -46,10 +46,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\Scripts\Ball.cs" />
      <Compile Include="Assets\Scripts\Block.cs" />
+     <Compile Include="Assets\Scripts\Item.cs" />
      <Compile Include="Assets\Scripts\Main.cs" />
+     <Compile Include="Assets\Scripts\SortingMethods.cs" />
  <Reference Include="Unity.PackageManagerUI.Editor">
- <HintPath>C:/Users/leony/Google Drive/Miscellaneous/UnityProjects/LaserGame/Sorting Visualizer/Library/ScriptAssemblies/Unity.PackageManagerUI.Editor.dll</HintPath>
+ <HintPath>C:/Users/leony/Google Drive/Miscellaneous/UnityProjects/SortingVisualizer/Library/ScriptAssemblies/Unity.PackageManagerUI.Editor.dll</HintPath>
  </Reference>
  <Reference Include="UnityEngine.AIModule">
  <HintPath>C:/Program Files/Unity 2018.1.0b8/Editor/Data/Managed/UnityEngine/UnityEngine.AIModule.dll</HintPath>
