@@ -147,7 +147,7 @@ public class SortingMethods : MonoBehaviour {
         if (end - start <= 1)
         {
             print("There should be one element");
-            Main.instance.listPrinter(Slice(A, start, end));
+            Main.listPrinter(Slice(A, start, end));
             //print("base Case");
         }
         else
@@ -250,7 +250,7 @@ public class SortingMethods : MonoBehaviour {
                 i++;
             }
             print("check1");
-            Main.instance.listPrinter(A);
+            Main.listPrinter(A);
         }
         while (j > k+i)
         { 
@@ -267,7 +267,7 @@ public class SortingMethods : MonoBehaviour {
 
             }
             print("check2");
-            Main.instance.listPrinter(A);
+            Main.listPrinter(A);
         }
     }
     // swaps items in A at indexes a and b
@@ -286,7 +286,7 @@ public class SortingMethods : MonoBehaviour {
         //print("check " + A.Count + " " + a + " " + b);
         A.Insert(b, A[a]);
         //print(b);
-        Main.instance.listPrinter(A);
+        Main.listPrinter(A);
         if (a < b)
         {
             A.RemoveAt(a);

@@ -23,16 +23,23 @@ public class UI : MonoBehaviour {
         }
         sortMenu.GetComponentInChildren<Text>().text = Main.sorts[0];
 
-
         // Hard coded
-        modeMenu.options = new List<UnityEngine.UI.Dropdown.OptionData>(new UnityEngine.UI.Dropdown.OptionData[2]);
-        modeMenu.options[0] = new UnityEngine.UI.Dropdown.OptionData("Ball");
-        modeMenu.options[1] = new UnityEngine.UI.Dropdown.OptionData("Block");
+        modeMenu.options = new List<UnityEngine.UI.Dropdown.OptionData>(new UnityEngine.UI.Dropdown.OptionData[Main.modes.Length]);
+        //print(modeMenu);
+        //print(Main.modes);
+        //print(new List<string>(Main.modes));
+        for (int i = 0; i < Main.modes.Length; i++)
+        {
+            modeMenu.options[i] = new UnityEngine.UI.Dropdown.OptionData(Main.modes[i]);
+        }
+        print("check");
+        //Main.instance.listPrinter(new List<string>(Main.modes));
+        Main.listPrinter(new List<string>(Main.modes));
+        modeMenu.GetComponentInChildren<Text>().text = Main.modes[0];
         // Add 3D option later
 
         numItemSlider.minValue = 1;
         numItemSlider.maxValue = 100;
-
 
     }
     public void updateSpeed()
@@ -48,8 +55,13 @@ public class UI : MonoBehaviour {
     }
     public void reset()
     {
-        Main.instance.init(sortMenu.options[sortMenu.value].text, modeMenu.options[modeMenu.value].text, (int) numItemSlider.value);
-        print((int)numItemSlider.value);
+        string sort = sortMenu.options[sortMenu.value].text;
+        string mode = modeMenu.options[modeMenu.value].text;
+        int numItems = (int)numItemSlider.value;
+        print(sort);
+        print(mode);
+        print(numItems);
+        Main.instance.init(sort, mode, numItems);
     }
     public void shuffle()
     {

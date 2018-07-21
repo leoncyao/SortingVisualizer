@@ -14,7 +14,7 @@ public class Main : MonoBehaviour {
     Camera mainCamera;
     public bool isSorted;
 
-    public string itemType, sortType, operationType;
+    public string modeType, sortType, operationType;
 
     public DateTime initialTime;
     public DateTime startTime;
@@ -23,7 +23,9 @@ public class Main : MonoBehaviour {
     public int operationCounter;
 
     GUIStyle guiStyle;
+
     public static String[] sorts = new string[] { "BubbleSort", "InsertionSort1", "InsertionSort2", "MergeSort1" };
+    public static String[] modes = new string[] { "Ball", "3D", "Block" };
 
     public List<GameObject> currentItems;
 
@@ -48,7 +50,7 @@ public class Main : MonoBehaviour {
         mainCamera.orthographicSize = screenSize / 2;
         mainCamera.backgroundColor = Color.blue;
         
-        init(sorts[1], "Ball", 50);
+        init(sorts[1], modes[0], 50);
     }
     public void Update()
     {
@@ -81,49 +83,57 @@ public class Main : MonoBehaviour {
         }
         checkFinished();
     }
-    public void init(string sortType, string itemType, int numItems)
+    public void init(string sortType, string modeType, int numItems)
     {
-        this.sortType = sortType;
-        this.itemType = itemType;
-        this.numItems = numItems;
-        //itemType = "Ball";
-
-        if (itemType == "Ball")
+        if (isSorted)
         {
-            itemPrefab = (GameObject)Resources.Load("prefabs/Ball", typeof(GameObject));
-        }
-        else if (itemType == "Block")
-        {
-            itemPrefab = (GameObject)Resources.Load("prefabs/Block", typeof(GameObject));
-        }
+            this.sortType = sortType;
+            this.modeType = modeType;
+            this.numItems = numItems;
+            print("ModeType is " + modeType);
 
-        startTime = new DateTime();
-        initialTime = DateTime.Now;
+            if (modeType == "Ball" || modeType == "3D")
+            {
+                itemPrefab = (GameObject)Resources.Load("prefabs/Ball", typeof(GameObject));
+            }
+            else if (modeType == "Block")
+            {
+                itemPrefab = (GameObject)Resources.Load("prefabs/Block", typeof(GameObject));
+            }
+            
+            // if modeType is not 3D, make camera orthographic
+            mainCamera.orthographic = !(modeType == "3D");
+          
 
-        isSorted = true;
-        sortSpeed = UI.sizeMax;
+            startTime = new DateTime();
+            initialTime = DateTime.Now;
 
-        //// Testing Sorts
-        //TestSort(sortType);
+            isSorted = true;
+            sortSpeed = UI.sizeMax;
 
-        foreach (GameObject temp in currentItems)
-        {
-            Destroy(temp);
-        }
-        Item.items = new List<Item>();
-        currentItems = new List<GameObject>();
-        for (int i = 0; i < numItems; i++)
-        {
-            currentItems.Add(Instantiate(itemPrefab, Vector3.zero, Quaternion.identity));
+            //// Testing Sorts
+            //TestSort(sortType);
+
+            foreach (GameObject temp in currentItems)
+            {
+                Destroy(temp);
+            }
+            Item.items = new List<Item>();
+            currentItems = new List<GameObject>();
+            for (int i = 0; i < numItems; i++)
+            {
+                GameObject temp = Instantiate(itemPrefab, Vector3.zero, Quaternion.identity);
+                temp.GetComponent<Ball>().calcLoc();
+                currentItems.Add(temp);
+            }
         }
     }
     public void shuffle()
     {
         if (SortingMethods.swaps.Count == 0 && SortingMethods.insertions.Count == 0)
-        {
-            
+        { 
             List<int> copy = new List<int>();
-            if (itemType == "Ball")
+            if (modeType == "Ball" || modeType == "3D")
             {
                 Item.positions = new List<int>(makeRandomVals(0, numItems));
                 Ball.randomizeAll();
@@ -131,15 +141,14 @@ public class Main : MonoBehaviour {
                 {
                     copy.Add(Item.positions[i]);
                 }
-                //bubbleSort(copy);
             }
-            else if (itemType == "Block")
+            else if (modeType == "Block")
             {
                 copy = new List<int>(makeRandomVals(0, numItems));
                 Block.positions = new List<int>(copy);
             }
 
-            bool toPrint = true;
+            bool toPrint = false;
 
             if (toPrint)
             {
@@ -180,7 +189,7 @@ public class Main : MonoBehaviour {
         GUI.Label(new Rect(40, 20 + 2 * guiStyle.fontSize + 1, 100, 100), "number of " + operationType, guiStyle);
         GUI.Label(new Rect(40, 20 + 3 * guiStyle.fontSize + 1, 100, 100), operationCounter.ToString(), guiStyle);
     }
-    public void listPrinter<T>(List<T> A)
+    public static void listPrinter<T>(List<T> A)
     {
         string word = "";
         foreach (T temp in A)
