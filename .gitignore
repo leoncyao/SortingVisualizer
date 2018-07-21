@@ -10,7 +10,8 @@
 /Assets/Plugins/GitHub/Editor
 /Library/metadata/
 /Library/
-
+/ProjectSettings/
+/
 # Visual Studio 2015 cache directory
 /.vs/
 
@@ -36,6 +37,9 @@ ExportedObj/
 *.fla
 *.xml
 *.config
+*.md
+*.preset
+*.json
 
 # Unity3D generated meta files
 *.pidb.meta
